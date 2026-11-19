@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragon Hoard — Pixel Clicker</title>
+<style>
+:root{--bg:#17251f;--panel:#26392e;--line:#718257;--gold:#f4c86c;--cream:#f5e9cf}
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#101a16;color:var(--cream);font-family:monospace;display:flex;justify-content:center}
+#game{width:min(680px,100%);background:var(--bg);padding:18px;border:4px solid #52684a;box-shadow:0 10px 0 #090f0c}
+header,.stats,.tabs,.footer{display:flex;justify-content:space-between;gap:10px;align-items:center}
+h1{font-size:clamp(22px,5vw,32px);letter-spacing:4px;color:var(--gold);margin:0}
+.sub,.small{font-size:12px;color:#c6c9a0}
+.panel{background:var(--panel);border:2px solid var(--line);padding:12px;margin-top:12px}
+.stat{font-size:24px;color:#ffcf69;font-weight:bold;margin-top:4px}
+.stats>div{flex:1}
+.scene{height:260px;margin-top:12px;border:3px solid var(--line);background:linear-gradient(#283d52 0%,#465a55 65%,#304a35 65%,#1b3025 100%);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.stars{position:absolute;color:#f8d77c;animation:twinkle 1.8s infinite alternate}
+@keyframes twinkle{to{opacity:.25}}
+.dragon{font-size:112px;line-height:1.5;cursor:pointer;user-select:none;filter:drop-shadow(4px 5px 0 #18251e);transition:transform .12s}
+.dragon:active{transform:scale(.9)}
+.ground{position:absolute;bottom:0;width:100%;height:25px;background:repeating-linear-gradient(90deg,#324d31 0 16px,#405d38 16px 32px)}
+.progress{height:13px;background:#17251f;border:1px solid #82905d;margin-top:8px}
+.progress>div{height:100%;background:#e7ad50;width:0%;transition:width .2s}
+button{font:inherit;color:#fff3cf;background:#3e5940;border:2px solid #a5a66b;padding:10px;cursor:pointer}
+button:hover:not(:disabled){background:#536f4c}
+button:disabled{opacity:.4;cursor:not-allowed}
+.tabs{margin-top:12px}
+.tabs button{flex:1;font-size:12px}
+.active{background:#8b713d}
+.upgrade{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #51634b}
+.upgrade:last-child{border:0}
+.upgrade button{min-width:82px}
+.hidden{display:none}
+.collection{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.species{text-align:center;padding:12px 5px;background:#17251f;border:1px solid var(--line)}
+.species .emoji{font-size:34px}
+.footer{margin-top:12px}
+@media(max-width:420px){body{padding:8px}.stat{font-size:20px}.scene{height:225px}.dragon{font-size:94px}}
+</style>
+</head>
+<body>
+<main id="game">
+<header><div><h1>🐉 DRAGON HOARD</h1><div class="sub">A tiny dragon's journey to greatness</div></div><div style="text-align:right"><div class="small">DRAGON LEVEL</div><div class="stat" id="level">1</div></div></header>
+<section class="stats">
+ <div class="panel"><div class="small">💰 GOLD HOARD</div><div class="stat" id="gold">0</div></div>
+ <div class="panel"><div class="small">✨ GOLD PER CLICK</div><div class="stat" id="power">1</div></div>
+</section>
+<section class="scene">
+ <span class="stars" style="left:13%;top:18%">✦</span><span class="stars" style="left:82%;top:25%;animation-delay:.8s">✧</span><span class="stars" style="left:69%;top:8%;animation-delay:.4s">✦</span>
+ <div class="small" id="dragon-name">BABY FOREST DRAGON</div>
+ <div class="dragon" id="dragon" role="button" tabindex="0" aria-label="Click dragon to collect gold">🐉</div>
+ <div class="small" id="message" style="color:#f5d58d">Click your dragon to collect gold!</div><div class="ground"></div>
+</section>
+<section class="panel"><div style="display:flex;justify-content:space-between;gap:8px;font-size:12px"><span>🐲 NEXT EVOLUTION</span><span id="xp-label">0 / 100 gold</span></div><div class="progress"><div id="xp"></div></div><div class="small" id="next" style="margin-top:8px">Collect 100 gold to grow your dragon!</div></section>
+<nav class="tabs"><button id="shop-tab" class="active">⚒ UPGRADES</button><button id="eggs-tab">🥚 DRAGON EGGS</button></nav>
+<section class="panel" id="shop"><strong style="color:var(--gold)">THE BLACKSMITH'S SHOP</strong><div class="small" style="margin-top:5px">Spend your treasure to become more powerful.</div>
+ <div class="upgrade"><div>🔥 Fire Breath<div class="small">+1 gold per click</div><div class="small" id="fire-cost">Cost: 25 gold</div></div><button id="fire-buy">BUY</button></div>
+ <div class="upgrade"><div>💎 Treasure Magnet<div class="small">+5 gold per click</div><div class="small" id="magnet-cost">Cost: 100 gold</div></div><button id="magnet-buy">BUY</button></div>
+ <div class="upgrade"><div>🪺 Baby Dragon Helper<div class="small">+1 gold every second</div><div class="small" id="helper-cost">Cost: 75 gold</div></div><button id="helper-buy">BUY</button></div>
+ <div class="upgrade"><div>🏰 Ancient Lair<div class="small">+5 gold every second</div><div class="small" id="lair-cost">Cost: 250 gold</div></div><button id="lair-buy">BUY</button></div>
+</section>
+<section class="panel hidden" id="eggs"><strong style="color:var(--gold)">THE DRAGON SANCTUARY</strong><p class="small">Discover rare dragons to join your collection!</p><div class="collection" id="collection"></div><button id="hatch" style="width:100%;margin-top:12px">🥚 HATCH AN EGG — 500 GOLD</button><div class="small" id="hatch-message" style="margin-top:8px">Each egg has a chance to reveal a rare dragon!</div></section>
+<div class="footer"><div class="small" id="passive">Passive income: 0 gold/sec</div><button id="reset" style="font-size:11px;padding:7px">RESET GAME</button></div>
+<div class="small" style="text-align:center;margin-top:14px">✦ CLICK • COLLECT • EVOLVE • CONQUER ✦</div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let gold=0,power=1,passive=0,current='🐉',dragons=['Forest Dragon'];
+const costs={fire:25,magnet:100,helper:75,lair:250};
+const stages=[{at:0,emoji:'🐉',name:'BABY FOREST DRAGON'},{at:100,emoji:'🐲',name:'YOUNG FOREST DRAGON'},{at:500,emoji:'🐉',name:'MIGHTY FOREST DRAGON'},{at:1500,emoji:'🐲',name:'ANCIENT FOREST DRAGON'},{at:5000,emoji:'🐉',name:'LEGENDARY DRAGON'}];
+const species=[{name:'Ember Dragon',emoji:'🔥🐉',chance:50},{name:'Ice Dragon',emoji:'🐲❄️',chance:32},{name:'Golden Dragon',emoji:'🐉✨',chance:15},{name:'Shadow Dragon',emoji:'🐲🌑',chance:3}];
+function stage(){return stages.filter(s=>gold>=s.at).at(-1)}
+function update(){
+ const s=stage(),next=stages.find(x=>x.at>gold);
+ $('gold').textContent=Math.floor(gold).toLocaleString();$('power').textContent=power;
+ $('level').textContent=stages.filter(x=>gold>=x.at).length;
+ $('dragon').textContent=current==='🐉'||current==='🐲'?s.emoji:current;
+ $('dragon-name').textContent=current==='🐉'||current==='🐲'?s.name:dragons.find(d=>species.find(x=>x.name===d&&x.emoji===current))||'YOUR RARE DRAGON';
+ $('passive').textContent=`Passive income: ${passive} gold/sec`;
+ $('xp-label').textContent=`${Math.floor(gold)} / ${next?next.at:'MAX'}`;
+ $('xp').style.width=(next?Math.min(100,gold/next.at*100):100)+'%';
+ $('next').textContent=next?`Collect ${next.at-Math.floor(gold)} more gold to evolve!`:'Your dragon has reached its final evolution!';
+ for(const t of Object.keys(costs)){ $(t+'-cost').textContent=`Cost: ${costs[t]} gold`;$(t+'-buy').disabled=gold<costs[t];}
+ $('hatch').disabled=gold<500;
+}
+function add(n){gold+=n;update()}
+function buy(t){
+ if(gold<costs[t])return;gold-=costs[t];
+ if(t==='fire'){power+=1;costs.fire=Math.floor(costs.fire*1.7)}
+ if(t==='magnet'){power+=5;costs.magnet=Math.floor(costs.magnet*1.9)}
+ if(t==='helper'){passive+=1;costs.helper=Math.floor(costs.helper*1.8)}
+ if(t==='lair'){passive+=5;costs.lair=Math.floor(costs.lair*2)}
+ update();
+}
+$('dragon').addEventListener('click',()=>{add(power);$('message').textContent=['Your dragon found treasure!','A golden flame!','The hoard grows!','More gold for the dragon!'][Math.floor(Math.random()*4)]});
+$('dragon').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('dragon').click()}});
+Object.keys(costs).forEach(t=>$ (t+'-buy').addEventListener('click',()=>buy(t)));
+setInterval(()=>{if(passive)add(passive)},1000);
+$('shop-tab').onclick=()=>{$('shop').classList.remove('hidden');$('eggs').classList.add('hidden');$('shop-tab').classList.add('active');$('eggs-tab').classList.remove('active')};
+$('eggs-tab').onclick=()=>{$('eggs').classList.remove('hidden');$('shop').classList.add('hidden');$('eggs-tab').classList.add('active');$('shop-tab').classList.remove('active')};
+function drawCollection(){
+ $('collection').innerHTML='<div class="species"><div class="emoji">🐉</div><div class="small">Forest Dragon</div><div class="small">Unlocked</div></div>'+species.map(d=>`<div class="species"><div class="emoji">${dragons.includes(d.name)?d.emoji:'🥚'}</div><div class="small">${d.name}</div><div class="small">${dragons.includes(d.name)?'Unlocked':'???'}</div></div>`).join('');
+}
+$('hatch').onclick=()=>{
+ if(gold<500)return;gold-=500;let r=Math.random()*100,d=species[0];
+ for(const x of species){r-=x.chance;if(r<=0){d=x;break}}
+ const fresh=!dragons.includes(d.name);if(fresh)dragons.push(d.name);current=d.emoji;
+ $('hatch-message').textContent=(fresh?'🎉 NEW DISCOVERY! ':'')+'You hatched a '+d.name+'! '+(fresh?'Added to your collection!':'A duplicate dragon!');
+ $('message').textContent='A new dragon has joined your lair!';drawCollection();update();
+};
+$('reset').onclick=()=>{
+ if(!confirm('Reset all your gold, upgrades and dragons?'))return;
+ gold=0;power=1;passive=0;current='🐉';dragons=['Forest Dragon'];
+ Object.assign(costs,{fire:25,magnet:100,helper:75,lair:250});
+ $('hatch-message').textContent='Each egg has a chance to reveal a rare dragon!';drawCollection();update();
+};
+drawCollection();update();
+})();
+</script>
+</body>
+</html>
